@@ -39,11 +39,9 @@ const App = () => {
     setLogsData([newLog, ...logsData]);
   };
   //删除
-  const delLogByIndex = (index) => {
+  const delLogByIndex = (id) => {
     setLogsData((prevState) => {
-      const newLog = [...prevState];
-      newLog.splice(index, 1);
-      return newLog;
+      return prevState.filter((item) => item.id !== id);
     });
   };
   return (

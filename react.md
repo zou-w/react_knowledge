@@ -49,3 +49,31 @@ setCounter(preCounter => preCounter+1)
 **`useRef()`:**
 
 返回一个ref对象,并且保持不变,不会刷新
+
+## 4.others
+
+#### 1.poral
+
+react Portal实现传送门（可以把组件挂载到任意节点上）
+
+```js
+ReactDOM.createPortal(child,container)
+```
+
+第一个参数child是可渲染的react子项，container是需要挂载到dom元素
+
+**使用:**
+
+- 引入`import ReactDOM from "react-dom";`
+
+- 获取节点`const backdropRoot = document.getElementById('backdrop-root')`
+
+- 挂载
+
+  ```react
+  ReactDOM.createPortal(<div className="backdrop">
+          {props.children}react
+      </div>, backdropRoot);
+  ```
+
+  

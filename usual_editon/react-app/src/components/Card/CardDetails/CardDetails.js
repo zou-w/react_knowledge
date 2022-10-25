@@ -23,7 +23,7 @@ export default function CardDetails() {
   //确认
   const okHandler = () => {
     //清空购物车
-    ctx.clearCart();
+    ctx.shopCartDataDispatch({ type: "clearCart" });
   };
   return (
     <Backdrop>

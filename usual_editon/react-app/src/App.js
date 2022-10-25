@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useReducer, useState } from "react";
 import Meals from "./components/Meals/Meals";
 import { MEALS_DATA } from "./constants/product";
 import CartContext from "./store/card-context";
@@ -14,45 +14,51 @@ export default function App() {
    *   2.商品总数（totalAmount）
    *   3.商品总价（totalPrice）
    * */
-  const [shopCartData, setShopCardShop] = useState({
+
+  //使用reducer做集中处理
+  const cartReducer = (state, action) => {
+    //赋值商品
+    const newCard = { ...state };
+    //函数回调
+    switch (action.type) {
+      case "addItem":
+        //判断购物车中是否有该商品
+        if (newCard.items.indexOf(action.meal) === -1) {
+          //不存在该商品,添加到购物车
+          newCard.items.push(action.meal);
+          action.meal.amount = 1;
+        } else {
+          action.meal.amount += 1;
+        }
+        // 增加总数
+        newCard.totalAmount += 1;
+        // 增加总金额
+        newCard.totalPrice += action.meal.price;
+        return newCard;
+      case "removeItem":
+        action.meal.amount -= 1;
+        //为0时,移除该商品
+        if (action.meal.amount === 0) {
+          newCard.items.splice(newCard.items.indexOf(action.meal), 1);
+        }
+        newCard.totalAmount -= 1;
+        newCard.totalPrice -= action.meal.price;
+        return newCard;
+      case "clearCart":
+        newCard.items.forEach((item) => delete item.amount);
+        newCard.items = [];
+        newCard.totalAmount = 0;
+        newCard.totalPrice = 0;
+        return newCard;
+      default:
+        return state;
+    }
+  };
+  const [shopCartData, shopCartDataDispatch] = useReducer(cartReducer, {
     items: [],
     totalAmount: 0,
     totalPrice: 0,
   });
-
-  //购物车添加商品
-  const addItem = (meal) => {
-    //赋值商品
-    const newCard = { ...shopCartData };
-    //判断购物车中是否有该商品
-    if (newCard.items.indexOf(meal) === -1) {
-      //不存在该商品,添加到购物车
-      newCard.items.push(meal);
-      meal.amount = 1;
-    } else {
-      meal.amount += 1;
-    }
-    // 增加总数
-    newCard.totalAmount += 1;
-    // 增加总金额
-    newCard.totalPrice += meal.price;
-
-    // 重新设置购物车
-    setShopCardShop(newCard);
-  };
-
-  //购物车减少商品
-  const removeItem = (meal) => {
-    const newCard = { ...shopCartData };
-    meal.amount -= 1;
-    //为0时,移除该商品
-    if (meal.amount === 0) {
-      newCard.items.splice(newCard.items.indexOf(meal), 1);
-    }
-    newCard.totalAmount -= 1;
-    newCard.totalPrice -= meal.price;
-    setShopCardShop(newCard);
-  };
 
   //搜索框过滤
   const filterHandler = (keyword) => {
@@ -66,21 +72,8 @@ export default function App() {
     );
     setMealsData(newMealsData);
   };
-
-  //清空购物车
-  const clearCart = () => {
-    const newCard = { ...shopCartData };
-    //将购物车中商品数量清零
-    newCard.items.forEach((item) => delete item.amount);
-    newCard.items = [];
-    newCard.totalAmount = 0;
-    newCard.totalPrice = 0;
-    setShopCardShop(newCard);
-  };
   return (
-    <CartContext.Provider
-      value={{ ...shopCartData, addItem, removeItem, clearCart }}
-    >
+    <CartContext.Provider value={{ ...shopCartData, shopCartDataDispatch }}>
       <div>
         <FilterMeals onFilter={filterHandler} />
         <Meals meals_data={mealsData} />

@@ -11,12 +11,12 @@ export default function Counter(props) {
   const ctx = useContext(CartContext);
   // 添加购物车的函数
   const addButtonHandler = () => {
-    ctx.addItem(props.meal);
+    ctx.shopCartDataDispatch({ type: "addItem", meal: props.meal });
   };
 
   // 删除食物的函数
   const subButtonHandler = () => {
-    ctx.removeItem(props.meal);
+    ctx.shopCartDataDispatch({ type: "removeItem", meal: props.meal });
   };
   return (
     <div className={classes.Counter}>

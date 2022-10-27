@@ -39,7 +39,7 @@ npx react-scripts start
 
 ## 3.hook
 
-**`useState()`:**
+### 1.**`useState()`:**
 
 异步执行,当调用setState()需要用到旧state时,可能会出现计算错误
 
@@ -49,33 +49,24 @@ npx react-scripts start
 setCounter(preCounter => preCounter+1)
 ```
 
-**`useRef()`:**
+### 2.**`useRef()`:**
 
 返回一个ref对象,并且保持不变,不会刷新
 
-**`useContext():`**
+### 3.**`useContext():`**
 
 配合context使用
 
-**`useEffect():`**
+### 4.**`useReducerr:`**
 
-**使用:**
-
-1. 第一个参数:函数(在组件渲染完毕后执行,需要一个函数作为参数)
-2. 第二个参数:数组(依赖项),通常会将使用的变量都设置到数组中,setState方法可以不设置
-
-如果设置了一个空数组,只会在初始化执行一次
-
-**可以解决函数体里面写代码的弊端,引发too many render**
-
-**`useReduce:`**
+**`reducer`一般会创建在组件外部,避免重复创建**
 
 - `state`:当前状态
 - `action`:对象
 
 ```js
 //定义到组件外部
-const [count,countDispatch] useReducer((state,action)=>{
+const [count,countDispatch] = useReducer((state,action)=>{
     //根据action.type进行判断执行操作
     switch(action.type){
         case 'ADD':
@@ -92,12 +83,78 @@ const add =()=>{
 }
 ```
 
-**`useCallback():`**
+```js
+//使用reducer函数
+//需要将新值return回去
+
+const cartReducer = (state, action) => {
+    //赋值商品
+    const newCard = { ...state };
+    //函数回调
+    switch (action.type) {
+      case "addItem":
+        //判断购物车中是否有该商品
+        if (newCard.items.indexOf(action.meal) === -1) {
+          //不存在该商品,添加到购物车
+          newCard.items.push(action.meal);
+          action.meal.amount = 1;
+        } else {
+          action.meal.amount += 1;
+        }
+        // 增加总数
+        newCard.totalAmount += 1;
+        // 增加总金额
+        newCard.totalPrice += action.meal.price;
+        return newCard;
+      case "removeItem":
+        action.meal.amount -= 1;
+        //为0时,移除该商品
+        if (action.meal.amount === 0) {
+          newCard.items.splice(newCard.items.indexOf(action.meal), 1);
+        }
+        newCard.totalAmount -= 1;
+        newCard.totalPrice -= action.meal.price;
+        return newCard;
+      case "clearCart":
+        newCard.items.forEach((item) => delete item.amount);
+        newCard.items = [];
+        newCard.totalAmount = 0;
+        newCard.totalPrice = 0;
+        return newCard;
+      default:
+        return state;
+    }
+  };
+
+//定义cartReducer函数
+  const [shopCartData, shopCartDataDispatch] = useReducer(cartReducer, {
+    items: [],
+    totalAmount: 0,
+    totalPrice: 0,
+  });
+```
+
+**`useEddect`和`useCallback`都是第一个参数是函数,第二个是依赖项**
+
+### 5.**`useEffect():`**
+
+**使用:**
+
+1. 第一个参数:函数(在组件渲染完毕后执行,需要一个函数作为参数)
+2. 第二个参数:数组(依赖项),通常会将使用的变量都设置到数组中,setState方法可以不设置
+
+如果设置了一个空数组,只会在初始化执行一次
+
+**可以解决函数体里面写代码的弊端,引发too many render**
+
+### 6.**`useCallback():`**
 
 - 回调函数
 - 依赖数组,中的变量发生变化时,才重新渲染
 
 不会总在组件重新渲染时重新创建
+
+
 
 ## 4.others
 
@@ -168,9 +225,18 @@ const B = () => {
 
 #### 5.Memo
 
-`React.memo(A)`
+`React.memo(A)`是一个高阶组件
 
-在props发生变化时触发,组件重新渲染
+*       它接收另一个组件作为参数，并且会返回一个包装过的新组件
+*       包装过的新组件就会具有缓存功能，
+*           包装过后，只有组件的props发生变化化
+*           才会触发组件的重新的渲染，否则总是返回缓存中结果
 
 #### 6.strapi
+
+## 5.请求
+
+组件初始化时需要向服务器发起数据
+
+需要使用`useEffect`组件
 

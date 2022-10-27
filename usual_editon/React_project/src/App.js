@@ -1,57 +1,38 @@
-import Logs from "./Components/Logs/Logs";
-import LogsForm from "./Components/LogsForm/LogsForm";
-import "./App.css";
-import { useState } from "react";
+import React, { useEffect } from "react";
+import StudentList from "./Components/StudentList";
 
-const App = () => {
-  // 模拟一组从服务器中加载的数据
-  const [logsData, setLogsData] = useState([
-    {
-      id: "001",
-      date: new Date(2021, 1, 20, 18, 30),
-      desc: "学习九阳神功",
-      time: 30,
-    },
-    {
-      id: "002",
-      date: new Date(2022, 2, 10, 12, 30),
-      desc: "学习降龙十八掌",
-      time: 20,
-    },
-    {
-      id: "003",
-      date: new Date(2022, 2, 11, 11, 30),
-      desc: "学习JavaScript",
-      time: 40,
-    },
-    {
-      id: "004",
-      date: new Date(2022, 2, 15, 10, 30),
-      desc: "学习React",
-      time: 80,
-    },
-  ]);
+//引入context
+import { StudentContext } from "./Context/StudentContext";
+//导入自定义hook
+import { useFetch } from "./hook/useFetch";
 
-  //子向父组件传值需要函数
-  //添加
-  const saveLogHandler = (newLog) => {
-    newLog.id = Date.now() + "";
-    setLogsData([newLog, ...logsData]);
+export default function App() {
+  //解构
+  const {
+    data: stuData,
+    isLoading,
+    error,
+    fetchData,
+  } = useFetch({
+    url: "/students",
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const loadDataHandler = () => {
+    fetchData();
   };
-  //删除
-  const delLogByIndex = (id) => {
-    setLogsData((prevState) => {
-      return prevState.filter((item) => item.id !== id);
-    });
-  };
+
   return (
-    <div className="app">
-      {/*引入LogsFrom*/}
-      <LogsForm onSaveLog={saveLogHandler} />
-      <Logs logsData={logsData} onDelLog={delLogByIndex} />
-    </div>
-  );
-};
+    <StudentContext.Provider value={{ fetchData }}>
+      <div className="app">
+        <button onClick={loadDataHandler}>加载数据</button>
 
-// 导出App
-export default App;
+        {!isLoading && !error && <StudentList studentData={stuData} />}
+        {isLoading && <p>数据正在加载中...</p>}
+        {error && <p>数据加载异常！</p>}
+      </div>
+    </StudentContext.Provider>
+  );
+}

@@ -240,3 +240,237 @@ const B = () => {
 
 需要使用`useEffect`组件
 
+## 6.redux
+
+### 1.使用步骤
+
+- 引入redux核心包
+- 创建reducer整合函数
+- 通过reducer对象创建store
+- 对store中的state进行订阅
+- 通过dispatch派发state的操作指令
+
+### 2.RTK使用
+
+npm install react-redux @reduxjs/toolkit -S
+
+yarn add react-redux @reduxjs/toolkit
+
+**使用:**
+
+- 引入provider,一个store
+- 创建切片`createSlice`
+- 创建store,`configureStore`
+
+**过程:**
+
+- 方法在创建的slice对象的action身上
+- 状态使用useSelector获取
+- 方法使用useDispatch获取
+
+## 7.Router
+
+### 1.**安装:**
+
+```shell
+npm:
+npm install react-router-dom@6
+
+yarn:
+yarn add react-router-dom@6
+```
+
+### 2.**使用:**
+
+1.在index.js中进行导入,`<App>` 的最外侧包裹一个 `<BrowserRouter>` 或 `<HashRouter>`
+
+```js
+import { BrowserRouter as Router } from "react-router-dom";
+
+<Router>
+    <App />
+</Router>
+```
+
+**2.在组件中导入对应路由链接组件,设路由链接**
+
+```js
+import { Link, Routes, Route } from 'react-router-dom'
+
+<Link className='list-group-item' to="/about">About</Link>
+<Link className='list-group-item' to="/home">Home</Link>
+```
+
+
+
+**3.在组件中(App.js)导入`Route`渲染组件,注册路由**
+
+```js
+import { Route, Routes } from "react-router-dom";
+
+ <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+</Routes>
+```
+
+**4.在组件中导入对应路由组件**
+
+### 3.路由表
+
+**`src/routes/index.js`**
+
+```js
+import { Navigate } from 'react-router-dom'
+import About from '../pages/About'
+import Home from '../pages/Home'
+
+// 路由映射表
+const routes =  [
+  {
+    path: '/home',
+    element: <Home />,
+  },
+  {
+    path: "/about",
+    element: <About />,
+    // 注意：子路由只需要写路径名称，不需要 "/" 
+    children: [{ path: "student", element: <Student /> }],
+  },
+  // 路由重定向
+  {
+    path: '/',
+    element: <Navigate to='/home'/>
+  }
+]
+
+export default routes
+```
+
+**`App.js`**
+
+```jsx
+import React from 'react'
+import { NavLink, useRoutes } from 'react-router-dom'
+// 导入编写好的路由映射表
+import routes from './routes'
+
+export default function App() {
+  return (
+    <div>
+		<div className="list-group">
+            {/* 设置路由链接 */}
+            <NavLink className='list-group-item' to="/about">About</NavLink>
+            <NavLink className='list-group-item' to="/home">Home</NavLink>
+          </div>
+          <div className="panel-body">
+              {/* 注册路由 */}
+              {/* 调用 useRoutes() hooks，嵌入路由映射表 */}
+              {useRoutes(routes)}
+          </div>
+     </div>
+  )
+}
+```
+
+**其他:**
+
+- 使用`NavLink`进行路由链接
+- 使用`Outlet`进行占位
+
+### 4.路由传参
+
+#### 1.params参数
+
+- 在路径后面用/进行拼接
+- 在路由表中定义接收路由参数
+- 对应组件使用`useParams()`接受参数
+
+**传参组件:**
+
+```js
+<Link to={`detail/${m.id}/${m.title}/${m.content}`}>{m.title}</Link>
+```
+
+**路由表:**
+
+```js
+{path: 'detail/:id/:title/:content', element: <Detail/>}
+```
+
+**对应组件:**
+
+```js
+import {useParams } from 'react-router-dom'
+
+const { id, title, content } = useParams()
+```
+
+#### 2.search参数
+
+- 传递params参数,在路径后面用`/`进行拼接
+- 对应组件使用`useSearchParams`接受参数
+
+**传参组件:**
+
+```js
+<Link to={`detail?id=${m.id}&title=${m.title}&content=${m.content}`}>{m.title}</Link>
+```
+
+**接受参数:**
+
+```js
+import { useLocation, useSearchParams } from 'react-router-dom'
+
+const [search, setSearch] = useSearchParams()
+
+ // 通过 get('search') 方法，获取 search 参数
+  const id = search.get('id')
+  const title = search.get('title')
+  const content = search.get('content')
+```
+
+#### 3.state参数:
+
+- 传递params参数,在后面用/进行拼接
+- 对应组件使用`useLocation`接收参数
+
+**传参组件:**
+
+```js
+<Link to='detail' state={{id:m.id, title:m.title, content:m.content}}>{m.title}</Link>
+```
+
+**接受组件:**
+
+```js
+import { useLocation } from 'react-router-dom'
+
+//连续解构赋值得到参数
+const { state: { id, title, content } } = useLocation()
+```
+
+### 5.编程式导航
+
+**使用`useNavigate():`**
+
+*仅支持 replace 和 state 属性，replace表示跳转的模式，state表示传递的state参数*
+
+**传参组件:**
+
+```js
+ function showDetail(m) {
+    navigate('detail', {
+      replace: true,
+      state: {
+        id: m.id,
+        title: m.title,
+        content: m.content
+      }
+    })
+  }
+```
+
+**接受组件:**
+
+使用`useLocation`进行接受
